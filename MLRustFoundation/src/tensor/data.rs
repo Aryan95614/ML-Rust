@@ -298,3 +298,4 @@ impl Tensor {
         self.shape.len()
     }
 }
+
