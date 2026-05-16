@@ -56,4 +56,3 @@ impl Layer for Dense {
         self
     }
 }
-
