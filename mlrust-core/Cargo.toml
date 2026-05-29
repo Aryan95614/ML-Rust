@@ -1,0 +1,15 @@
+[package]
+name = "mlrust-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["MLRust Contributors"]
+description = "Core tensor and autograd primitives for MLRust family of libraries"
+license = "MIT"
+
+[dependencies]
+ndarray = "0.17"
+rand = "0.9"
+rand_distr = "0.5"
+
+[dev-dependencies]
+approx = "0.5"
