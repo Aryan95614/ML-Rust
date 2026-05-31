@@ -103,3 +103,123 @@ impl Tensor {
     pub fn set_grad_fn(&self, grad_fn: Arc<dyn GradFn>) {
         self.inner.borrow_mut().grad_manager.set_grad_fn(grad_fn);
     }
+
+    /// Sets the gradient
+    pub fn set_grad(&self, grad: Array2<f32>) {
+        self.inner.borrow_mut().grad_manager.set_grad(grad);
+    }
+
+    /// Clears the gradient
+    pub fn zero_grad(&self) {
+        self.inner.borrow_mut().grad_manager.zero_grad();
+    }
+
+    /// Accumulates gradient (adds to existing or sets if none)
+    pub fn accumulate_grad(&self, grad: Array2<f32>) {
+        let mut inner = self.inner.borrow_mut();
+        if let Some(existing_grad) = inner.grad_manager.grad_mut() {
+            *existing_grad = &*existing_grad + &grad;
+        } else {
+            inner.grad_manager.set_grad(grad);
+        }
+    }
+
+    /// Extracts scalar value (panics if not 1x1)
+    pub fn item(&self) -> f32 {
+        let shape = self.shape();
+        assert_eq!(shape, (1, 1), "item() only works on scalar tensors");
+        self.inner.borrow().data[[0, 0]]
+    }
+
+    /// Initiates backpropagation (must be scalar)
+    pub fn backward(&self) {
+        let shape = self.shape();
+        assert_eq!(shape, (1, 1), "backward() only works on scalar tensors");
+
+        let grad = Array2::ones((1, 1));
+        self.set_grad(grad.clone());
+
+        if let Some(grad_fn) = self.grad_fn() {
+            grad_fn.backward(&grad);
+        }
+    }
+
+    // Core operations - these will be implemented in ops module
+    pub fn add(&self, other: &Tensor) -> Tensor {
+        crate::ops::add(self, other)
+    }
+
+    pub fn mul(&self, other: &Tensor) -> Tensor {
+        crate::ops::mul(self, other)
+    }
+
+    pub fn matmul(&self, other: &Tensor) -> Tensor {
+        crate::ops::matmul(self, other)
+    }
+
+    pub fn sum(&self) -> Tensor {
+        crate::ops::sum(self)
+    }
+
+    pub fn mean(&self) -> Tensor {
+        crate::ops::mean(self)
+    }
+
+    pub fn relu(&self) -> Tensor {
+        crate::ops::relu(self)
+    }
+
+    pub fn sigmoid(&self) -> Tensor {
+        crate::ops::sigmoid(self)
+    }
+
+    pub fn transpose(&self) -> Tensor {
+        crate::ops::transpose(self)
+    }
+
+    pub fn log(&self) -> Tensor {
+        crate::ops::log(self)
+    }
+
+    pub fn neg(&self) -> Tensor {
+        crate::ops::neg(self)
+    }
+
+    pub fn clamp(&self, min: f32, max: f32) -> Tensor {
+        crate::ops::clamp(self, min, max)
+    }
+}
+
+impl std::fmt::Debug for Tensor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Tensor")
+            .field("shape", &self.shape())
+            .field("requires_grad", &self.requires_grad())
+            .field("has_grad", &self.grad().is_some())
+            .finish()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tensor_creation() {
+        let t = Tensor::zeros((2, 3), true);
+        assert_eq!(t.shape(), (2, 3));
+        assert!(t.requires_grad());
+    }
+
+    #[test]
+    fn test_tensor_clone_shares_data() {
+        let t1 = Tensor::ones((2, 2), true);
+        let t2 = t1.clone();
+
+        // Modify t1's data
+        t1.set_data(Array2::zeros((2, 2)));
+
+        // t2 should see the change (shared data)
+        assert_eq!(t2.data()[[0, 0]], 0.0);
+    }
+}
