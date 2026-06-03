@@ -525,4 +525,3 @@ mod tests {
         assert!(b.grad().is_some());
     }
 }
-
