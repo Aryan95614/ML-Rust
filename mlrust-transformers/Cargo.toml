@@ -1,0 +1,16 @@
+[package]
+name = "mlrust-transformers"
+version = "0.1.0"
+edition = "2021"
+authors = ["MLRust Contributors"]
+description = "Transformer building blocks (attention, layernorm, FFN, encoder block) for the MLRust ecosystem"
+license = "MIT"
+
+[dependencies]
+mlrust-core = { path = "../mlrust-core" }
+ndarray = "0.17"
+rand = "0.9"
+rand_distr = "0.5"
+
+[dev-dependencies]
+approx = "0.5"
