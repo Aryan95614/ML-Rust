@@ -1,3 +1,6 @@
 # Build artifacts
 **/target/
 .DS_Store
+
+# Experimental mlrust library - not ready to commit new files
+mlrust/
