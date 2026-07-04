@@ -129,3 +129,4 @@ pub fn sigmoid(input: &Tensor) -> Tensor {
 
 // Note: Inline tests have been moved to tests/unit_tensor.rs
 // See tests/unit_tensor.rs for activation tests
+
